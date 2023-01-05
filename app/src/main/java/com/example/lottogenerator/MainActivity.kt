@@ -18,11 +18,31 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    private val job = Job()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
+        binding.generatebutton.setOnClickListener {
+            val lottoNumbers = createLottoNumbers()
+            Log.d("TAG", lottoNumbers.toString())
+            updateLottoBallImage(lottoNumbers)
+
+            CoroutineScope(Dispatchers.IO + job).launch {
+                val winningNumbers = async { getLottoNumbers() }
+                val rank = whatIsRank(lottoNumbers, winningNumbers.await())
+                val text = "${winningNumbers.await()} : $rank"
+
+                withContext(Dispatchers.Main) {
+                    binding.tvWinning.text = text
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
+        job.cancel()
         super.onDestroy()
     }
 
@@ -77,7 +97,7 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun getLottoNumbers(): ArrayList<Int> {
         val round = "970" //회자
-        val url = "https://dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=$round"
+        val url = "https://dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=$round" // Get형식의 gson 데이터 호출
         val lottoNumbers = ArrayList<Int>() // 당첨 번호 저장 리스트
 
         try {
@@ -97,6 +117,29 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         return lottoNumbers
+    }
+
+    private fun whatIsRank(lottoNumbers:ArrayList<Int>, winningNumbers:ArrayList<Int>):String{
+        var matchCount = 0
+        for (i in 0..5){
+            if (lottoNumbers.contains(winningNumbers[i])) matchCount += 1
+        }
+        return if (matchCount == 6) {
+            "1등"
+        } else if (matchCount == 5) {
+            if (lottoNumbers.contains(winningNumbers[6])){
+                "2등"
+            }
+            else{
+                "3등"
+            }
+        } else if (matchCount == 4){
+            "4등"
+        } else if (matchCount == 4){
+            "5등"
+        } else {
+            "낙첨"
+        }
     }
 
 }
