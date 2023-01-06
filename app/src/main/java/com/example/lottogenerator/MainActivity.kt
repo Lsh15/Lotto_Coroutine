@@ -1,7 +1,6 @@
 package com.example.lottogenerator
 
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lottogenerator.databinding.ActivityMainBinding
@@ -96,8 +95,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun getLottoNumbers(): ArrayList<Int> {
-        val round = "970" //회자
-        val url = "https://dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=$round" // Get형식의 gson 데이터 호출
+        val num = Integer.parseInt(binding.roundNum.text.toString())
+//        val round = "970" //회자
+        val url =
+            "https://dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=$num" // Get형식의 gson 데이터 호출
         val lottoNumbers = ArrayList<Int>() // 당첨 번호 저장 리스트
 
         try {
@@ -111,7 +112,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 val bonusNumber = jsonObject.get("bnusNo").asInt
                 lottoNumbers.add(bonusNumber)
-                lottoNumbers.add(round.toInt())
+                 lottoNumbers.add(num)
             }
         } catch (e: Exception) {
             e.printStackTrace()
