@@ -2,6 +2,7 @@ package com.example.lottogenerator
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.lottogenerator.databinding.ActivityMainBinding
 import com.google.gson.JsonParser
@@ -97,6 +98,10 @@ class MainActivity : AppCompatActivity() {
     private suspend fun getLottoNumbers(): ArrayList<Int> {
         val num = Integer.parseInt(binding.roundNum.text.toString())
 //        val round = "970" //회자
+        if (0<num || num<1000){
+
+        }
+
         val url =
             "https://dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=$num" // Get형식의 gson 데이터 호출
         val lottoNumbers = ArrayList<Int>() // 당첨 번호 저장 리스트
@@ -122,25 +127,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun whatIsRank(lottoNumbers:ArrayList<Int>, winningNumbers:ArrayList<Int>):String{
         var matchCount = 0
-        for (i in 0..5){
-            if (lottoNumbers.contains(winningNumbers[i])) matchCount += 1
-        }
-        return if (matchCount == 6) {
-            "1등"
-        } else if (matchCount == 5) {
-            if (lottoNumbers.contains(winningNumbers[6])){
-                "2등"
+        var answer = ""
+        if (winningNumbers.size == 0){
+            answer="결과 없음"
+            return answer
+        }else{
+            for (i in 0..5){
+                if (lottoNumbers.contains(winningNumbers[i])) matchCount += 1
             }
-            else{
-                "3등"
+            if (matchCount == 6) {
+                answer = "1등"
+            } else if (matchCount == 5) {
+                if (lottoNumbers.contains(winningNumbers[6])){
+                    answer = "2등"
+                }
+                else{
+                    answer = "3등"
+                }
+            } else if (matchCount == 4){
+                answer = "4등"
+            } else if (matchCount == 4){
+                answer = "5등"
+            } else {
+                answer = "낙첨"
             }
-        } else if (matchCount == 4){
-            "4등"
-        } else if (matchCount == 4){
-            "5등"
-        } else {
-            "낙첨"
+            return answer
         }
     }
-
 }
